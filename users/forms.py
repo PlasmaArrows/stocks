@@ -7,3 +7,6 @@ class CustomUserCreationForm(UserCreationForm):
 
 class StockForm(forms.Form):
     ticker = forms.CharField(label="GME TO THE MOON", max_length=4)
+
+
+# This is a form
