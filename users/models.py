@@ -7,7 +7,7 @@ class User(models.Model):
     money = models.DecimalField(max_digits=100, decimal_places=2)
 
     def __str__(self):
-        return self.name
+        return self.money
 
 class Stocks(models.Model):
     ticker = models.CharField(max_length=4)

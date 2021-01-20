@@ -3,6 +3,8 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from users.forms import CustomUserCreationForm, StockForm
 from users.models import User, Stocks
+from yahoo_fin import stock_info as si
+
 
 import yfinance as yf
 
@@ -22,7 +24,7 @@ def register(request):
             user = form.save()
             
             # Shove in user 
-            new_user = User(name=user.username, money=345.4)
+            new_user = User(name=user.username, money=100000)
             new_user.save()
 
             login(request, user)
@@ -36,8 +38,28 @@ def searchStock(request):
         form = StockForm(request.POST)
         if form.is_valid():
             stockTicker = form["ticker"].value()
+            stockJSON = si.get_live_price(stockTicker)
 
-            stockJSON = yf.Ticker(stockTicker)
+            #find corresponding user and take awayy money spent
+            username = str(request.user)
+            # print(trader)
+            # print(trader.name)
+            trader = None
+            for user in User.objects.all():
+                print(username)
+                print(type(user.name))
+                print(user.money)
+                if(user.name == username):
+                    print("sadsdfg")
+                    trader = user
+            print(trader.name)
+            print(trader.money)
+            if(trader != None):
+                money = trader.money - int(stockJSON)
+                trader.money = money
+                
+            stockJSON = trader.money
+            
 
             return redirect("viewStock", stockJSON)
 
