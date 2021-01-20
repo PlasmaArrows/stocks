@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content%}
+
+    <h2>Search Stock</h2>
+
+
+    <!-- ADD FANCY FUCKING CSS HTML SHIT LATER -->
+    <form method="POST">
+        {% csrf_token %}
+        {{form}}
+        
+        <button type="submit">Search</button>
+
+    </form>
+
+{% endblock %}

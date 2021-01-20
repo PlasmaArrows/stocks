@@ -7,14 +7,9 @@ Hello, {{ user.username|default:'Guest' }}!
 
 <div>
     {% if user.is_authenticated %} 
-
-        <form action="../finance.py" method="get">
-            <input type="text" placeholder="GME TO THE MOON" name="search">
-            <button type="submit"><i class="fa fa-search"></i></button>
-        </form>
-
         <a href="{% url 'logout' %}">Logout</a>
         <a href="{% url 'password_change' %}">Change password</a>
+        <a href="{% url 'search_stock' %}">Search Stock</a>
     {% else %}
         <a href="{% url 'login' %}">Login</a>
     {% endif %}

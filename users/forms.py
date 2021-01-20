@@ -6,7 +6,4 @@ class CustomUserCreationForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ("email",)
 
 class StockForm(forms.Form):
-    ticker = forms.CharField(label="GME TO THE MOON", max_length=4)
-
-
-# This is a form
+    ticker = forms.CharField(label="GME TO THE FUADFADSF MOON", max_length=4)
