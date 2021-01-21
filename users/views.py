@@ -44,7 +44,7 @@ def searchStock(request, user_id):
             
 
             # FIX LATER
-            trader = User.objects.get(pk=int(user_id) - 3)
+            trader = User.objects.get(pk=user_id)
 
             # This idea is a fucking twat idea
             # if(trader != None):
