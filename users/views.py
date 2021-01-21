@@ -5,8 +5,7 @@ from users.forms import CustomUserCreationForm, StockForm
 from users.models import User, Stocks
 from yahoo_fin import stock_info as si
 
-
-import yfinance as yf
+import locale
 
 def dashboard(request):
     return render(request, "users/dashboard.html")
@@ -31,38 +30,44 @@ def register(request):
 
             return redirect(reverse("dashboard"))
 
-def searchStock(request):
+def searchStock(request, user_id):
     if request.method == "GET":
         return render(request, "users/searchStock.html", {"form": StockForm})
     elif request.method == "POST":
         form = StockForm(request.POST)
         if form.is_valid():
-            stockTicker = form["ticker"].value()
-            stockJSON = si.get_live_price(stockTicker)
 
-            #find corresponding user and take awayy money spent
-            username = str(request.user)
-            # print(trader)
-            # print(trader.name)
-            trader = None
-            for user in User.objects.all():
-                print(username)
-                print(type(user.name))
-                print(user.money)
-                if(user.name == username):
-                    print("sadsdfg")
-                    trader = user
-            print(trader.name)
-            print(trader.money)
-            if(trader != None):
-                money = trader.money - int(stockJSON)
-                trader.money = money
-                
-            stockJSON = trader.money
+            locale.setlocale(locale.LC_ALL, '')
+
+            stockTicker = form["ticker"].value()
+            stockJSON = locale.currency(si.get_live_price(stockTicker), grouping=True)
             
 
-            return redirect("viewStock", stockJSON)
+            # FIX LATER
+            trader = User.objects.get(pk=int(user_id) - 3)
 
-def viewStock(request, stockJSON):
-    context = {'stock_info': stockJSON}
+            # This idea is a fucking twat idea
+            # if(trader != None):
+            #     money = trader.money - int(stockJSON)
+            #     trader.money = money
+                
+            # stockJSON = trader.money
+            
+            request.session['stock_info'] = stockJSON
+            request.session['trader_name'] = trader.name
+            request.session['trader_money'] = locale.currency(trader.money, grouping=True)
+
+            return redirect("viewStock", user_id)
+
+def viewStock(request, user_id):
+    context = {
+        'stock_info': request.session['stock_info'],
+        'trader_name': request.session['trader_name'],
+        'trader_money': request.session['trader_money'],
+    }
+
+
     return render(request, "users/viewStock.html", context)
+
+def buyStock(request):
+    pass

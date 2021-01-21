@@ -7,6 +7,6 @@ urlpatterns = [
     url(r"^accounts/", include("django.contrib.auth.urls")),
     url(r"^dashboard/", dashboard, name="dashboard"),
     url(r"^register/", register, name="register"),
-    url(r"^searchStock/", searchStock, name="search_stock"),
-    url(r"^viewStock/(.*)", viewStock, name="viewStock")
+    url(r"^searchStock/(?P<user_id>[\d]+)/", searchStock, name="search_stock"),
+    url(r"^viewStock/(?P<user_id>[\d]+)/", viewStock, name="viewStock")
 ]
