@@ -6,7 +6,7 @@ class CustomUserCreationForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ("email",)
 
 class StockForm(forms.Form):
-    ticker = forms.CharField(label="GME TO THE FUADFADSF MOON", max_length=4)
+    ticker = forms.CharField(label="GME TO THE FUCKING MOON", max_length=4)
 
 class BuyForm(forms.Form):
     buy = forms.IntegerField(label="Buy Stock")

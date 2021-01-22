@@ -1,9 +1,11 @@
 from django.contrib.auth import login
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from users.forms import CustomUserCreationForm, StockForm
+from users.forms import CustomUserCreationForm, StockForm, BuyForm
 from users.models import User, Stocks
 from yahoo_fin import stock_info as si
+
+from decimal import *
 
 import locale
 
@@ -64,27 +66,42 @@ def viewStock(request, user_id):
         'stock_info': request.session['stock_info'],
         'trader_name': request.session['trader_name'],
         'trader_money': request.session['trader_money'],
+        'form': BuyForm
     }
 
-    return render(request, "users/viewStock.html", context)
+    if request.method == "GET":
+        return render(request, "users/ViewStock.html", context)
+    elif request.method == "POST":
+
+        form = BuyForm(request.POST)
+
+        if form.is_valid():
+            stock_price = request.session['stock_info']
+            trader = User.objects.get(pk=user_id)
+            money = trader.money
+
+
+            print(money)
+
+            quantity = form["buy"].value()
+            
+            money = trader.money - Decimal((float(quantity) * float(stock_price[1:len(stock_price)])))
+            trader.money = money
+            trader.save()
+            
+            
+
+            locale.setlocale(locale.LC_ALL, '')
+
+            # Set request session's tradermoney (global)
+            request.session['trader_money'] = locale.currency(trader.money, grouping=True)
+
+            # Set context trader_money (locale)
+            context['trader_money'] = request.session['trader_money']
+
+            return redirect("viewStock", user_id)
+
 
 def buyStock(request, user_id):
-    print("fat cock")
-    if request.method == "GET":
-        return render(request, "users/viewStock.html", {"form": BuyForm})
-    elif request.method == "POST":
-        stockJSON = request.session['trader_money']
-        trader = User.objects.get(pk=user_id)
-        money = trader.money
-        print(money)
-        stockTicker = form["buy"].value()
-        money = trader.money - si.get_live_price(stockTicker)
-        trader.money = money
-
-        trader.save()
-        request.session['trader_money'] = locale.currency(trader.money, grouping=True)
-        
-    # stockJSON = trader.money
-    
-    return redirect("viewStock", user_id)
+    pass
 
