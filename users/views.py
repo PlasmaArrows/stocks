@@ -66,8 +66,25 @@ def viewStock(request, user_id):
         'trader_money': request.session['trader_money'],
     }
 
-
     return render(request, "users/viewStock.html", context)
 
-def buyStock(request):
-    pass
+def buyStock(request, user_id):
+    print("fat cock")
+    if request.method == "GET":
+        return render(request, "users/viewStock.html", {"form": BuyForm})
+    elif request.method == "POST":
+        stockJSON = request.session['trader_money']
+        trader = User.objects.get(pk=user_id)
+        money = trader.money
+        print(money)
+        stockTicker = form["buy"].value()
+        money = trader.money - si.get_live_price(stockTicker)
+        trader.money = money
+
+        trader.save()
+        request.session['trader_money'] = locale.currency(trader.money, grouping=True)
+        
+    # stockJSON = trader.money
+    
+    return redirect("viewStock", user_id)
+

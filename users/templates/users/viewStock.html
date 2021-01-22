@@ -5,4 +5,12 @@
     <h2>{{stock_info}}</h2>
     <h3>{{trader_name}}</h3>
     <h3>{{trader_money}}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{form}}
+
+        <button type="submit">Buy</button>
+    </form>
+
 {% endblock %}

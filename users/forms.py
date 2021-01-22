@@ -7,3 +7,6 @@ class CustomUserCreationForm(UserCreationForm):
 
 class StockForm(forms.Form):
     ticker = forms.CharField(label="GME TO THE FUADFADSF MOON", max_length=4)
+
+class BuyForm(forms.Form):
+    buy = forms.IntegerField(label="Buy Stock")
