@@ -11,8 +11,8 @@ class User(models.Model):
 
 class Stocks(models.Model):
     ticker = models.CharField(max_length=4)
-    boughtTime = models.DateTimeField()
     owned_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    amount = models.IntegerField(default = 0)
 
     def __str__(self):
         return self.ticker

@@ -5,12 +5,23 @@
     <h2>{{stock_info}}</h2>
     <h3>{{trader_name}}</h3>
     <h3>{{trader_money}}</h3>
+    <h4>{{display}}</h4>
+    <h4>{{amount_owned}}</h4>
+
+
 
     <form method="POST">
         {% csrf_token %}
-        {{form}}
+        {{buy_form}}
 
-        <button type="submit">Buy</button>
+        <button type="submit" name = buy_button>Buy</button>
+    </form>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{sell_form}}
+
+        <button type="submit" name = "sell_button">Sell</button>
     </form>
 
 {% endblock %}

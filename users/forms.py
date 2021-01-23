@@ -10,3 +10,6 @@ class StockForm(forms.Form):
 
 class BuyForm(forms.Form):
     buy = forms.IntegerField(label="Buy Stock")
+
+class SellForm(forms.Form):
+    sell = forms.IntegerField(label="Sell Stock")
