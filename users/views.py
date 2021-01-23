@@ -82,11 +82,6 @@ def viewStock(request, user_id):
         'display': request.session['display'],
     }
 
-    print(user_id)
-    print(Stocks.objects.filter(owned_by__pk=user_id))
-    print(user_id)
-    print(User.objects.filter(pk=user_id))
-
     if request.method == "GET":
         return render(request, "users/ViewStock.html", context)
     elif request.method == "POST":
@@ -121,16 +116,12 @@ def viewStock(request, user_id):
 
                     stock_ticker = request.session['stock_ticker']
 
-                    print(stock_ticker)
                     # User does NOT own any shares of current stock
                     if len(Stocks.objects.filter(owned_by__pk=user_id, ticker=stock_ticker)) == 0:
-                        print("REACHED INSIDE HERE")
                         add_stock = Stocks(ticker=stock_ticker, 
                             owned_by = user, 
                             quantity_owned = quantity)
                         add_stock.save()
-
-                        print("hellow")
 
                     # User owns shares of current stock
                     else:
