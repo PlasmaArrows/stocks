@@ -1,7 +1,7 @@
 from django.contrib.auth import login
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from users.forms import CustomUserCreationForm, StockForm, BuyForm
+from users.forms import CustomUserCreationForm, StockForm, BuyForm, SellForm
 from users.models import User, Stocks
 from yahoo_fin import stock_info as si
 
@@ -55,51 +55,107 @@ def searchStock(request, user_id):
                 
             # stockJSON = trader.money
             
+            request.session['ticker'] = stockTicker
             request.session['stock_info'] = stockJSON
             request.session['trader_name'] = trader.name
             request.session['trader_money'] = locale.currency(trader.money, grouping=True)
-
+            request.session['display'] = ' '
+            if(len(Stocks.objects.filter(pk=user_id)) == 0):
+                request.session['stocks_owned'] = 0
+            else:
+                request.session['stocks_owned'] = Stocks.objects.filter(pk=user_id)[0].amount
+            
             return redirect("viewStock", user_id)
 
 def viewStock(request, user_id):
+    locale.setlocale(locale.LC_ALL, '')
     context = {
         'stock_info': request.session['stock_info'],
         'trader_name': request.session['trader_name'],
         'trader_money': request.session['trader_money'],
-        'form': BuyForm
+        'buy_form': BuyForm,
+        'sell_form' : SellForm,
+        'display': request.session['display'],
+        'amount_owned': request.session['stocks_owned']
     }
 
     if request.method == "GET":
         return render(request, "users/ViewStock.html", context)
     elif request.method == "POST":
 
-        form = BuyForm(request.POST)
-
-        if form.is_valid():
-            stock_price = request.session['stock_info']
-            trader = User.objects.get(pk=user_id)
-            money = trader.money
-
-
-            print(money)
-
-            quantity = form["buy"].value()
+        if('sell_button' in request.POST):
+            form = SellForm(request.POST)
+            if form.is_valid():
+                stock_price = request.session['stock_info']
+                trader = User.objects.get(pk=user_id)
+                money = trader.money
+                quantity = form["sell"].value()
+                if(len(Stocks.objects.filter(pk=user_id)) != 0):
+                    amount = Stocks.objects.filter(ticker = request.session['ticker'], pk=user_id)[0].amount
+                    if(int(quantity) > amount):
+                        request.session['display'] = "You don't own enough of this stock"
+                    else:
+                        
+                        stock_price = stock_price.strip(',')
+                        stock_price = stock_price.strip('$')
+                        money = trader.money + Decimal((float(quantity) * float(stock_price)))
+                        row = Stocks.objects.filter(pk=user_id)[0]
+                        new_amount = Stocks.objects.filter(pk=user_id)[0].amount - int(quantity)
+                        row.amount = new_amount
+                        row.save()
+                        trader.money = money
+                        trader.save()
+                        request.session['trader_money'] = locale.currency(trader.money, grouping=True)
+                        # Set context trader_money (locale)
+                        context['trader_money'] = request.session['trader_money']
+                        request.session['stocks_owned'] = Stocks.objects.filter(pk=user_id)[0].amount
+            else:
+                request.session['display'] = "You don't own this stock"
             
-            money = trader.money - Decimal((float(quantity) * float(stock_price[1:len(stock_price)])))
-            trader.money = money
-            trader.save()
-            
-            
+        else:
+            form = BuyForm(request.POST)
+            if form.is_valid():
+                stock_price = request.session['stock_info']
+                trader = User.objects.get(pk=user_id)
+                money = trader.money
 
-            locale.setlocale(locale.LC_ALL, '')
+                print(money)
 
-            # Set request session's tradermoney (global)
-            request.session['trader_money'] = locale.currency(trader.money, grouping=True)
+                quantity = form["buy"].value()
+                
+                stock_price = stock_price.strip(',')
+                stock_price = stock_price.strip('$')
 
-            # Set context trader_money (locale)
-            context['trader_money'] = request.session['trader_money']
+                money = trader.money - Decimal((float(quantity) * float(stock_price)))
+                
+                if(money < 0):
+                    request.session['display'] = "Inefficient funds to purchase"
+                    return redirect("viewStock", user_id)
+                else:
+                    request.session['display'] = "Succesfully bought"
+                    trader.money = money
+                    trader.save()
+                    
+                    if(len(Stocks.objects.filter(pk=user_id)) == 0):
+                        amount_stock = 0
+                        stocks = Stocks(ticker = request.session['ticker'], owned_by = trader, amount = int(amount_stock) + int(quantity))
+                        stocks.save()   
+                    else:
+                        row = Stocks.objects.filter(pk=user_id)[0]
+                        new_amount = Stocks.objects.filter(pk=user_id)[0].amount + int(quantity)
+                        row.amount = new_amount
+                        row.save()
+                        
+                    
+                    # Set request session's tradermoney (global)
+                    request.session['trader_money'] = locale.currency(trader.money, grouping=True)
 
-            return redirect("viewStock", user_id)
+                    # Set context trader_money (locale)
+                    context['trader_money'] = request.session['trader_money']
+                    request.session['stocks_owned'] = Stocks.objects.filter(pk=user_id)[0].amount
+                    
+    return redirect("viewStock", user_id)
+
 
 
 def buyStock(request, user_id):
