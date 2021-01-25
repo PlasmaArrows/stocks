@@ -1,0 +1,16 @@
+<!--users/templates/users/dashboard.html-->
+
+{% extends 'base.html' %}
+
+{% block content %}
+Hello, {{ user.username|default:'Guest' }}!
+
+<div>
+        <a href="{% url 'search_stock' user.id %}">Search Stock</a>
+
+        <h2>You Own The Following Stocks:</h2>
+
+        <h3>{{stocks_owned|linebreaksbr}}</h2>
+
+</div>
+{% endblock %}

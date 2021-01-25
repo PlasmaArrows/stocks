@@ -10,7 +10,23 @@ from decimal import *
 import locale
 
 def dashboard(request):
+   
     return render(request, "users/dashboard.html")
+
+def profile(request, user_id):
+    context = {}
+    stocks = ""
+    list = Stocks.objects.filter(owned_by__pk=user_id)
+    if(len(list) == 0):
+        pass
+    else:
+        for i in list:
+            stocks += str((i.ticker)) + ": " + str(i.quantity_owned) + "\n" + "\n"
+
+    print(stocks)
+    return render(request, "users/profile.html",
+                    {"stocks_owned": stocks})
+
 
 def register(request):
     if request.method == "GET":
