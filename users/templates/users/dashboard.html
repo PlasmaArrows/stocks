@@ -2,8 +2,16 @@
 
 {% extends 'base.html' %}
 
+{% load static %}
+
+<img src="{% static 'users/test.jpg' %}" alt="My image">
+
+
 {% block content %}
 Hello, {{ user.username|default:'Guest' }}!
+
+{% load static %}
+
 
 <div>
     {% if user.is_authenticated %} 
